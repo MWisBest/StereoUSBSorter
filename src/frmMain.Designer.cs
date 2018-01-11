@@ -65,7 +65,7 @@ namespace StereoUSBSorter
 			// lblSelectedDrive
 			// 
 			this.lblSelectedDrive.AutoSize = true;
-			this.lblSelectedDrive.Location = new System.Drawing.Point(12, 43);
+			this.lblSelectedDrive.Location = new System.Drawing.Point(12, 36);
 			this.lblSelectedDrive.Name = "lblSelectedDrive";
 			this.lblSelectedDrive.Size = new System.Drawing.Size(143, 13);
 			this.lblSelectedDrive.TabIndex = 1;
@@ -74,9 +74,9 @@ namespace StereoUSBSorter
 			// btnApply
 			// 
 			this.btnApply.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.btnApply.Location = new System.Drawing.Point(0, 73);
+			this.btnApply.Location = new System.Drawing.Point(0, 61);
 			this.btnApply.Name = "btnApply";
-			this.btnApply.Size = new System.Drawing.Size(323, 23);
+			this.btnApply.Size = new System.Drawing.Size(384, 23);
 			this.btnApply.TabIndex = 2;
 			this.btnApply.Text = "&Apply";
 			this.btnApply.UseVisualStyleBackColor = true;
@@ -89,7 +89,7 @@ namespace StereoUSBSorter
             this.miOptions});
 			this.menuStrip.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip.Name = "menuStrip";
-			this.menuStrip.Size = new System.Drawing.Size(323, 24);
+			this.menuStrip.Size = new System.Drawing.Size(384, 24);
 			this.menuStrip.TabIndex = 3;
 			this.menuStrip.Text = "menuStrip";
 			// 
@@ -163,29 +163,29 @@ namespace StereoUSBSorter
 			// 
 			this.txtLog.BackColor = System.Drawing.SystemColors.Info;
 			this.txtLog.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.txtLog.Location = new System.Drawing.Point(0, 96);
+			this.txtLog.Location = new System.Drawing.Point(0, 84);
 			this.txtLog.MaxLength = 0;
 			this.txtLog.Multiline = true;
 			this.txtLog.Name = "txtLog";
 			this.txtLog.ReadOnly = true;
 			this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.txtLog.Size = new System.Drawing.Size(323, 132);
+			this.txtLog.Size = new System.Drawing.Size(384, 155);
 			this.txtLog.TabIndex = 4;
 			this.txtLog.TabStop = false;
 			// 
 			// progressBar
 			// 
 			this.progressBar.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.progressBar.Location = new System.Drawing.Point(0, 228);
+			this.progressBar.Location = new System.Drawing.Point(0, 239);
 			this.progressBar.Name = "progressBar";
-			this.progressBar.Size = new System.Drawing.Size(323, 23);
+			this.progressBar.Size = new System.Drawing.Size(384, 23);
 			this.progressBar.TabIndex = 5;
 			// 
 			// frmMain
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(323, 251);
+			this.ClientSize = new System.Drawing.Size(384, 262);
 			this.Controls.Add(this.btnApply);
 			this.Controls.Add(this.txtLog);
 			this.Controls.Add(this.progressBar);
@@ -193,6 +193,7 @@ namespace StereoUSBSorter
 			this.Controls.Add(this.menuStrip);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip;
+			this.MinimumSize = new System.Drawing.Size(300, 300);
 			this.Name = "frmMain";
 			this.Text = "Stereo USB Sorter";
 			this.menuStrip.ResumeLayout(false);
