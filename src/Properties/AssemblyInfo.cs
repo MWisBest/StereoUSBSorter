@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle( "Stereo USB Alphabetizer" )]
+[assembly: AssemblyTitle( "Stereo USB Sorter" )]
 [assembly: AssemblyDescription( "" )]
 [assembly: AssemblyConfiguration( "" )]
 [assembly: AssemblyCompany( "" )]
-[assembly: AssemblyProduct( "Stereo USB Alphabetizer" )]
+[assembly: AssemblyProduct( "Stereo USB Sorter" )]
 [assembly: AssemblyCopyright( "Copyright © 2018, Kyle Repinski" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]

@@ -1,5 +1,5 @@
 ﻿/*
- * Stereo USB Alphabetizer
+ * Stereo USB Sorter
  * Copyright (C) 2018, Kyle Repinski
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ using System.IO;
 using System.Security;
 using System.Windows.Forms;
 
-namespace StereoUSBAlphabetizer
+namespace StereoUSBSorter
 {
 	public static class Util
 	{

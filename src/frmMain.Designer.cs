@@ -1,5 +1,5 @@
 ﻿/*
- * Stereo USB Alphabetizer
+ * Stereo USB Sorter
  * Copyright (C) 2018, Kyle Repinski
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-namespace StereoUSBAlphabetizer
+namespace StereoUSBSorter
 {
 	partial class frmMain
 	{
@@ -124,7 +124,7 @@ namespace StereoUSBAlphabetizer
             this.miOptionsAdvancedSortFiles,
             this.miOptionsAdvancedChangeDates});
 			this.miOptionsAdvanced.Name = "miOptionsAdvanced";
-			this.miOptionsAdvanced.Size = new System.Drawing.Size(152, 22);
+			this.miOptionsAdvanced.Size = new System.Drawing.Size(132, 22);
 			this.miOptionsAdvanced.Text = "Advanced";
 			// 
 			// miOptionsAdvancedSortFolders
@@ -132,21 +132,21 @@ namespace StereoUSBAlphabetizer
 			this.miOptionsAdvancedSortFolders.Checked = true;
 			this.miOptionsAdvancedSortFolders.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.miOptionsAdvancedSortFolders.Name = "miOptionsAdvancedSortFolders";
-			this.miOptionsAdvancedSortFolders.Size = new System.Drawing.Size(152, 22);
+			this.miOptionsAdvancedSortFolders.Size = new System.Drawing.Size(147, 22);
 			this.miOptionsAdvancedSortFolders.Text = "Sort Folders";
 			// 
 			// miOptionsAdvancedSortFiles
 			// 
 			this.miOptionsAdvancedSortFiles.CheckOnClick = true;
 			this.miOptionsAdvancedSortFiles.Name = "miOptionsAdvancedSortFiles";
-			this.miOptionsAdvancedSortFiles.Size = new System.Drawing.Size(152, 22);
+			this.miOptionsAdvancedSortFiles.Size = new System.Drawing.Size(147, 22);
 			this.miOptionsAdvancedSortFiles.Text = "Sort Files";
 			// 
 			// miOptionsAdvancedChangeDates
 			// 
 			this.miOptionsAdvancedChangeDates.CheckOnClick = true;
 			this.miOptionsAdvancedChangeDates.Name = "miOptionsAdvancedChangeDates";
-			this.miOptionsAdvancedChangeDates.Size = new System.Drawing.Size(152, 22);
+			this.miOptionsAdvancedChangeDates.Size = new System.Drawing.Size(147, 22);
 			this.miOptionsAdvancedChangeDates.Text = "Change Dates";
 			// 
 			// miOptionsEnableLog
@@ -155,7 +155,7 @@ namespace StereoUSBAlphabetizer
 			this.miOptionsEnableLog.CheckOnClick = true;
 			this.miOptionsEnableLog.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.miOptionsEnableLog.Name = "miOptionsEnableLog";
-			this.miOptionsEnableLog.Size = new System.Drawing.Size(152, 22);
+			this.miOptionsEnableLog.Size = new System.Drawing.Size(132, 22);
 			this.miOptionsEnableLog.Text = "Enable Log";
 			this.miOptionsEnableLog.CheckStateChanged += new System.EventHandler(this.miOptionsEnableLog_CheckStateChanged);
 			// 
@@ -194,7 +194,7 @@ namespace StereoUSBAlphabetizer
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip;
 			this.Name = "frmMain";
-			this.Text = "Stereo USB Alphabetizer";
+			this.Text = "Stereo USB Sorter";
 			this.menuStrip.ResumeLayout(false);
 			this.menuStrip.PerformLayout();
 			this.ResumeLayout(false);
