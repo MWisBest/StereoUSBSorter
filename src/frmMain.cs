@@ -33,6 +33,11 @@ namespace StereoUSBAlphabetizer
 		public frmMain()
 		{
 			InitializeComponent();
+			// Hide individual file sorting and timestamp change buttons until implemented.
+			this.miOptionsAdvancedSortFiles.Enabled = false;
+			this.miOptionsAdvancedSortFiles.Visible = false;
+			this.miOptionsAdvancedChangeDates.Enabled = false;
+			this.miOptionsAdvancedChangeDates.Visible = false;
 		}
 
 		/// <summary>
