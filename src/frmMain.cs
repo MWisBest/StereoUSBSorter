@@ -19,7 +19,6 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Security;
 using System.Windows.Forms;
 
@@ -35,7 +34,7 @@ namespace StereoUSBSorter
 		{
 			InitializeComponent();
 			// Add version number to the window title.
-			string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			string version = Application.ProductVersion;
 			this.Text = this.Text + " v" + version.Substring( 0, version.LastIndexOf( '.' ) );
 			// Hide individual file sorting and timestamp change buttons until implemented.
 			this.miOptionsAdvancedSortFiles.Enabled = false;
