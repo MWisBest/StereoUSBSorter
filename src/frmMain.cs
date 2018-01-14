@@ -210,7 +210,10 @@ namespace StereoUSBSorter
 				{
 					try
 					{
-						sortDirectory( dis[i], sortNextDirFolders, sortNextDirFiles );
+						sortDirectory( dis[i],
+							sortFolders: sortNextDirFolders,
+							sortFiles: sortNextDirFiles,
+							isRootDir: false );
 					}
 					catch( Exception e )
 					{
@@ -300,7 +303,10 @@ namespace StereoUSBSorter
 				this.writeToLog( "Begin Sorting: " + dirFullName );
 				try
 				{
-					sortDirectory( this.selectedDirectory, this.miOptionsAdvancedSortFolders.Checked, this.miOptionsAdvancedSortFiles.Checked, true );
+					sortDirectory( this.selectedDirectory,
+						sortFolders: this.miOptionsAdvancedSortFolders.Checked,
+						sortFiles: this.miOptionsAdvancedSortFiles.Checked,
+						isRootDir: true );
 				}
 				catch( Exception exc )
 				{
