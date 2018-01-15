@@ -53,7 +53,6 @@ namespace StereoUSBSorter
 			Application.SetCompatibleTextRenderingDefault( false );
 			Application.Run( new frmMain() );
 		}
-
 		public void writeToLog( string text )
 		{
 			if( this.logEnabled )
@@ -251,6 +250,24 @@ namespace StereoUSBSorter
 			}
 		}
 
+		private TreeNode addNodesForDirectory( DirectoryInfo dir, TreeNode root )
+		{
+			TreeNode tn = new TreeNode( dir.Name )
+			{
+				Tag = dir
+			};
+			DirectoryInfo[] subdirs = dir.GetDirectories();
+			for( int i = 0; i < subdirs.Length; ++i )
+			{
+				addNodesForDirectory( subdirs[i], tn );
+			}
+			if( root != null )
+			{
+				root.Nodes.Add( tn );
+			}
+			return tn;
+		}
+
 		#region Form Controls
 		private void btnApply_Click( object sender, EventArgs e )
 		{
@@ -344,16 +361,24 @@ namespace StereoUSBSorter
 
 		private void miFileOpen_Click( object sender, EventArgs e )
 		{
-			FolderBrowserDialog fbd = new FolderBrowserDialog();
-			fbd.ShowNewFolderButton = false;
-			fbd.RootFolder = Environment.SpecialFolder.MyComputer;
-			fbd.Description = "Select drive/root folder to 'alphabetize'";
+			FolderBrowserDialog fbd = new FolderBrowserDialog
+			{
+				ShowNewFolderButton = false,
+				RootFolder = Environment.SpecialFolder.MyComputer,
+				Description = "Select drive/root folder to 'alphabetize'"
+			};
 			if( fbd.ShowDialog() == DialogResult.OK )
 			{
 				try
 				{
 					this.selectedDirectory = new DirectoryInfo( fbd.SelectedPath );
 					this.lblSelectedDrive.Text = "Selected Drive/Folder: " + fbd.SelectedPath;
+					this.fileSystemWatcher.Path = this.selectedDirectory.FullName;
+					this.fileSystemWatcher.EnableRaisingEvents = true;
+					this.tvHierarchy.BeginUpdate();
+					this.tvHierarchy.Nodes.Clear();
+					this.tvHierarchy.Nodes.Add( this.addNodesForDirectory( this.selectedDirectory, null ) );
+					this.tvHierarchy.EndUpdate();
 				}
 				catch
 				{
@@ -377,6 +402,62 @@ namespace StereoUSBSorter
 				this.txtLog.BackColor = SystemColors.Control;
 				this.txtLog.Text = "";
 			}
+		}
+
+		private void tvHierarchy_AfterSelect( object sender, TreeViewEventArgs e )
+		{
+			if( this.lbSorting.Tag != null )
+			{
+				TreeNode curNode = (TreeNode)this.lbSorting.Tag;
+				if( curNode.Equals( e.Node ) )
+				{
+					return;
+				}
+			}
+			this.lbSorting.Tag = e.Node;
+			this.lbSorting.Items.Clear();
+			foreach( TreeNode node in e.Node.Nodes )
+			{
+				this.lbSorting.Items.Add( node );
+			}
+		}
+
+		private void lbSorting_MouseDown( object sender, MouseEventArgs e )
+		{
+			if( this.lbSorting.SelectedItem != null )
+			{
+				this.lbSorting.DoDragDrop( this.lbSorting.SelectedItem, DragDropEffects.Move );
+			}
+		}
+
+		private void lbSorting_DragOver( object sender, DragEventArgs e )
+		{
+			e.Effect = DragDropEffects.Move;
+		}
+
+		private void lbSorting_DragDrop( object sender, DragEventArgs e )
+		{
+			Point point = this.lbSorting.PointToClient( new Point( e.X, e.Y ) );
+			int index = this.lbSorting.IndexFromPoint( point );
+			if( index < 0 )
+			{
+				index = this.lbSorting.Items.Count - 1;
+			}
+			TreeNode tn = (TreeNode)e.Data.GetData( typeof( TreeNode ) );
+			// Make a temporary copy of the parent so it isn't forgotten when the current node is removed.
+			TreeNode parent = tn.Parent;
+			this.lbSorting.Items.Remove( tn );
+			parent.Nodes.Remove( tn );
+			parent.Nodes.Insert( index, tn );
+			this.lbSorting.Items.Insert( index, tn );
+		}
+
+		private void fileSystemEvent( object sender, FileSystemEventArgs e )
+		{
+		}
+
+		private void fileSystemEventRenamed( object sender, RenamedEventArgs e )
+		{
 		}
 		#endregion
 	}

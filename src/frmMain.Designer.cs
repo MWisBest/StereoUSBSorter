@@ -59,7 +59,16 @@ namespace StereoUSBSorter
 			this.miOptionsEnableLog = new System.Windows.Forms.ToolStripMenuItem();
 			this.txtLog = new System.Windows.Forms.TextBox();
 			this.progressBar = new System.Windows.Forms.ProgressBar();
+			this.treeContainer = new System.Windows.Forms.SplitContainer();
+			this.tvHierarchy = new System.Windows.Forms.TreeView();
+			this.lbSorting = new System.Windows.Forms.ListBox();
+			this.fileSystemWatcher = new System.IO.FileSystemWatcher();
 			this.menuStrip.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.treeContainer)).BeginInit();
+			this.treeContainer.Panel1.SuspendLayout();
+			this.treeContainer.Panel2.SuspendLayout();
+			this.treeContainer.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// lblSelectedDrive
@@ -74,9 +83,9 @@ namespace StereoUSBSorter
 			// btnApply
 			// 
 			this.btnApply.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.btnApply.Location = new System.Drawing.Point(0, 61);
+			this.btnApply.Location = new System.Drawing.Point(0, 276);
 			this.btnApply.Name = "btnApply";
-			this.btnApply.Size = new System.Drawing.Size(384, 23);
+			this.btnApply.Size = new System.Drawing.Size(627, 23);
 			this.btnApply.TabIndex = 2;
 			this.btnApply.Text = "&Apply";
 			this.btnApply.UseVisualStyleBackColor = true;
@@ -89,7 +98,7 @@ namespace StereoUSBSorter
             this.miOptions});
 			this.menuStrip.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip.Name = "menuStrip";
-			this.menuStrip.Size = new System.Drawing.Size(384, 24);
+			this.menuStrip.Size = new System.Drawing.Size(627, 24);
 			this.menuStrip.TabIndex = 3;
 			this.menuStrip.Text = "menuStrip";
 			// 
@@ -163,29 +172,80 @@ namespace StereoUSBSorter
 			// 
 			this.txtLog.BackColor = System.Drawing.SystemColors.Info;
 			this.txtLog.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.txtLog.Location = new System.Drawing.Point(0, 84);
+			this.txtLog.Location = new System.Drawing.Point(0, 299);
 			this.txtLog.MaxLength = 0;
 			this.txtLog.Multiline = true;
 			this.txtLog.Name = "txtLog";
 			this.txtLog.ReadOnly = true;
 			this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-			this.txtLog.Size = new System.Drawing.Size(384, 155);
+			this.txtLog.Size = new System.Drawing.Size(627, 93);
 			this.txtLog.TabIndex = 4;
 			this.txtLog.TabStop = false;
 			// 
 			// progressBar
 			// 
 			this.progressBar.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.progressBar.Location = new System.Drawing.Point(0, 239);
+			this.progressBar.Location = new System.Drawing.Point(0, 392);
 			this.progressBar.Name = "progressBar";
-			this.progressBar.Size = new System.Drawing.Size(384, 23);
+			this.progressBar.Size = new System.Drawing.Size(627, 23);
 			this.progressBar.TabIndex = 5;
+			// 
+			// treeContainer
+			// 
+			this.treeContainer.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.treeContainer.Location = new System.Drawing.Point(0, 52);
+			this.treeContainer.Name = "treeContainer";
+			// 
+			// treeContainer.Panel1
+			// 
+			this.treeContainer.Panel1.Controls.Add(this.tvHierarchy);
+			// 
+			// treeContainer.Panel2
+			// 
+			this.treeContainer.Panel2.Controls.Add(this.lbSorting);
+			this.treeContainer.Size = new System.Drawing.Size(627, 224);
+			this.treeContainer.SplitterDistance = 260;
+			this.treeContainer.TabIndex = 9;
+			// 
+			// tvHierarchy
+			// 
+			this.tvHierarchy.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tvHierarchy.Location = new System.Drawing.Point(0, 0);
+			this.tvHierarchy.Name = "tvHierarchy";
+			this.tvHierarchy.Size = new System.Drawing.Size(260, 224);
+			this.tvHierarchy.TabIndex = 0;
+			this.tvHierarchy.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvHierarchy_AfterSelect);
+			// 
+			// lbSorting
+			// 
+			this.lbSorting.AllowDrop = true;
+			this.lbSorting.DisplayMember = "Text";
+			this.lbSorting.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.lbSorting.FormattingEnabled = true;
+			this.lbSorting.Location = new System.Drawing.Point(0, 0);
+			this.lbSorting.Name = "lbSorting";
+			this.lbSorting.Size = new System.Drawing.Size(363, 224);
+			this.lbSorting.TabIndex = 0;
+			this.lbSorting.ValueMember = "Text";
+			this.lbSorting.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbSorting_DragDrop);
+			this.lbSorting.DragOver += new System.Windows.Forms.DragEventHandler(this.lbSorting_DragOver);
+			this.lbSorting.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbSorting_MouseDown);
+			// 
+			// fileSystemWatcher
+			// 
+			this.fileSystemWatcher.IncludeSubdirectories = true;
+			this.fileSystemWatcher.SynchronizingObject = this;
+			this.fileSystemWatcher.Changed += new System.IO.FileSystemEventHandler(this.fileSystemEvent);
+			this.fileSystemWatcher.Created += new System.IO.FileSystemEventHandler(this.fileSystemEvent);
+			this.fileSystemWatcher.Deleted += new System.IO.FileSystemEventHandler(this.fileSystemEvent);
+			this.fileSystemWatcher.Renamed += new System.IO.RenamedEventHandler(this.fileSystemEventRenamed);
 			// 
 			// frmMain
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(384, 262);
+			this.ClientSize = new System.Drawing.Size(627, 415);
+			this.Controls.Add(this.treeContainer);
 			this.Controls.Add(this.btnApply);
 			this.Controls.Add(this.txtLog);
 			this.Controls.Add(this.progressBar);
@@ -198,9 +258,13 @@ namespace StereoUSBSorter
 			this.Text = "Stereo USB Sorter";
 			this.menuStrip.ResumeLayout(false);
 			this.menuStrip.PerformLayout();
+			this.treeContainer.Panel1.ResumeLayout(false);
+			this.treeContainer.Panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.treeContainer)).EndInit();
+			this.treeContainer.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
-
 		}
 
 		#endregion
@@ -217,6 +281,9 @@ namespace StereoUSBSorter
 		private System.Windows.Forms.TextBox txtLog;
 		private System.Windows.Forms.ToolStripMenuItem miOptionsEnableLog;
 		private System.Windows.Forms.ProgressBar progressBar;
+		private System.Windows.Forms.SplitContainer treeContainer;
+		private System.Windows.Forms.TreeView tvHierarchy;
+		private System.IO.FileSystemWatcher fileSystemWatcher;
+		private System.Windows.Forms.ListBox lbSorting;
 	}
 }
-
