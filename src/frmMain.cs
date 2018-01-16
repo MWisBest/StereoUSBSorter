@@ -53,6 +53,7 @@ namespace StereoUSBSorter
 			Application.SetCompatibleTextRenderingDefault( false );
 			Application.Run( new frmMain() );
 		}
+
 		public void writeToLog( string text )
 		{
 			if( this.logEnabled )
@@ -372,7 +373,6 @@ namespace StereoUSBSorter
 				try
 				{
 					this.selectedDirectory = new DirectoryInfo( fbd.SelectedPath );
-					this.lblSelectedDrive.Text = "Selected Drive/Folder: " + fbd.SelectedPath;
 					this.fileSystemWatcher.Path = this.selectedDirectory.FullName;
 					this.fileSystemWatcher.EnableRaisingEvents = true;
 					this.tvHierarchy.BeginUpdate();

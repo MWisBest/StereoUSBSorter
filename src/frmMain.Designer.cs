@@ -46,7 +46,6 @@ namespace StereoUSBSorter
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
-			this.lblSelectedDrive = new System.Windows.Forms.Label();
 			this.btnApply = new System.Windows.Forms.Button();
 			this.menuStrip = new System.Windows.Forms.MenuStrip();
 			this.miFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,15 +69,6 @@ namespace StereoUSBSorter
 			this.treeContainer.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
 			this.SuspendLayout();
-			// 
-			// lblSelectedDrive
-			// 
-			this.lblSelectedDrive.AutoSize = true;
-			this.lblSelectedDrive.Location = new System.Drawing.Point(12, 36);
-			this.lblSelectedDrive.Name = "lblSelectedDrive";
-			this.lblSelectedDrive.Size = new System.Drawing.Size(143, 13);
-			this.lblSelectedDrive.TabIndex = 1;
-			this.lblSelectedDrive.Text = "Selected Drive/Folder: None";
 			// 
 			// btnApply
 			// 
@@ -192,8 +182,8 @@ namespace StereoUSBSorter
 			// 
 			// treeContainer
 			// 
-			this.treeContainer.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.treeContainer.Location = new System.Drawing.Point(0, 52);
+			this.treeContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.treeContainer.Location = new System.Drawing.Point(0, 24);
 			this.treeContainer.Name = "treeContainer";
 			// 
 			// treeContainer.Panel1
@@ -203,7 +193,7 @@ namespace StereoUSBSorter
 			// treeContainer.Panel2
 			// 
 			this.treeContainer.Panel2.Controls.Add(this.lbSorting);
-			this.treeContainer.Size = new System.Drawing.Size(627, 224);
+			this.treeContainer.Size = new System.Drawing.Size(627, 252);
 			this.treeContainer.SplitterDistance = 260;
 			this.treeContainer.TabIndex = 9;
 			// 
@@ -212,7 +202,7 @@ namespace StereoUSBSorter
 			this.tvHierarchy.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tvHierarchy.Location = new System.Drawing.Point(0, 0);
 			this.tvHierarchy.Name = "tvHierarchy";
-			this.tvHierarchy.Size = new System.Drawing.Size(260, 224);
+			this.tvHierarchy.Size = new System.Drawing.Size(260, 252);
 			this.tvHierarchy.TabIndex = 0;
 			this.tvHierarchy.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvHierarchy_AfterSelect);
 			// 
@@ -224,7 +214,7 @@ namespace StereoUSBSorter
 			this.lbSorting.FormattingEnabled = true;
 			this.lbSorting.Location = new System.Drawing.Point(0, 0);
 			this.lbSorting.Name = "lbSorting";
-			this.lbSorting.Size = new System.Drawing.Size(363, 224);
+			this.lbSorting.Size = new System.Drawing.Size(363, 252);
 			this.lbSorting.TabIndex = 0;
 			this.lbSorting.ValueMember = "Text";
 			this.lbSorting.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbSorting_DragDrop);
@@ -233,6 +223,7 @@ namespace StereoUSBSorter
 			// 
 			// fileSystemWatcher
 			// 
+			this.fileSystemWatcher.EnableRaisingEvents = true;
 			this.fileSystemWatcher.IncludeSubdirectories = true;
 			this.fileSystemWatcher.SynchronizingObject = this;
 			this.fileSystemWatcher.Changed += new System.IO.FileSystemEventHandler(this.fileSystemEvent);
@@ -249,7 +240,6 @@ namespace StereoUSBSorter
 			this.Controls.Add(this.btnApply);
 			this.Controls.Add(this.txtLog);
 			this.Controls.Add(this.progressBar);
-			this.Controls.Add(this.lblSelectedDrive);
 			this.Controls.Add(this.menuStrip);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip;
@@ -265,10 +255,10 @@ namespace StereoUSBSorter
 			((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
+
 		}
 
 		#endregion
-		private System.Windows.Forms.Label lblSelectedDrive;
 		private System.Windows.Forms.Button btnApply;
 		private System.Windows.Forms.MenuStrip menuStrip;
 		private System.Windows.Forms.ToolStripMenuItem miFile;
