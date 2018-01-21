@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 using System;
+using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Security;
 using System.Windows.Forms;
 
@@ -29,6 +29,7 @@ namespace StereoUSBSorter
 		private DirectoryInfo selectedDirectory;
 		private bool logEnabled = true;
 		private bool isBusySorting = false;
+		private DataSet db;
 
 		public frmMain()
 		{
@@ -69,17 +70,16 @@ namespace StereoUSBSorter
 		}
 
 		/// <summary>
-		/// "Sorts" a directory for head units/other embedded devices to read in alphabetical order that otherwise wouldn't.
+		/// "Sorts" a directory for head units/other embedded devices to read in order that otherwise wouldn't.
 		/// 
-		/// This is done by simply moving a folder/file to a temporary directory, and then back to its original location, in alphabetical order.
+		/// This is done by simply moving a folder/file to a temporary directory, and then back to its original location,
+		/// in the order specified by TreeNode.
 		/// </summary>
-		/// <param name="dir">directory to sort</param>
-		/// <param name="sortFolders">whether or not to sort (move) folders</param>
-		/// <param name="sortFiles">whether or not to sort (move) individual files</param>
-		/// <param name="isRootDir">whether or not this is the first directory (controls progress bar)</param>
-		private void sortDirectory( DirectoryInfo dir, bool sortFolders = true, bool sortFiles = false, bool isRootDir = false )
+		/// <param name="node">node to sort</param>
+		private void sortTreeNodeDirectories( TreeNode node )
 		{
-			DirectoryInfo[] dis;
+			DirectoryInfo dir = (DirectoryInfo)node.Tag;
+			bool isRootDir = node.Parent == null;
 			string dirFullName;
 
 			try
@@ -90,26 +90,6 @@ namespace StereoUSBSorter
 			{
 				this.writeToLog( "WARNING: Unable to read full name of input directory. Wat? Skipping..." );
 				return;
-			}
-
-			try
-			{
-				dis = dir.GetDirectories();
-			}
-			catch( DirectoryNotFoundException )
-			{
-				this.writeToLog( "WARNING: Directory \"" + dirFullName + "\" has disappeared? Skipping..." );
-				return;
-			}
-			catch( SystemException se ) when( se is UnauthorizedAccessException || se is SecurityException )
-			{
-				this.writeToLog( "WARNING: Not authorized to access directory \"" + dirFullName + "\". Skipping..." );
-				return;
-			}
-
-			if( sortFolders )
-			{
-				dis = dis.OrderBy( x => x.Name ).ToArray();
 			}
 
 			DirectoryInfo temp;
@@ -130,21 +110,21 @@ namespace StereoUSBSorter
 				this.progressBar.Value = 0;
 				Application.DoEvents();
 			}
-			float progressBarInc = 100 / dis.Length;
+			float progressBarInc = 100 / node.Nodes.Count;
 
-			for( int i = 0; i < dis.Length; ++i )
+			for( int i = 0; i < node.Nodes.Count; ++i )
 			{
-				if( sortFolders )
+				if( node.Nodes[i].Tag is DirectoryInfo subdir )
 				{
 					try
 					{
 						if( isRootDir )
 						{
-							this.writeToLog( Environment.NewLine + "Sorting Folder: " + dis[i].Name );
+							this.writeToLog( Environment.NewLine + "Sorting Folder: " + subdir.Name );
 						}
 						else
 						{
-							this.writeToLog( "Sorting Folder: " + Path.Combine( dis[i].Parent.Name, dis[i].Name ) );
+							this.writeToLog( "Sorting Folder: " + Path.Combine( subdir.Parent.Name, subdir.Name ) );
 						}
 					}
 					catch
@@ -154,66 +134,31 @@ namespace StereoUSBSorter
 
 					try
 					{
-						dis[i].MoveTo( Path.Combine( temp.FullName, dis[i].Name ) );
+						subdir.MoveTo( Path.Combine( temp.FullName, subdir.Name ) );
 					}
 					catch
 					{
-						this.writeToLog( "WARNING: Failed to move \"" + dis[i].Name + "\" to temporary directory! Skipping..." );
+						this.writeToLog( "WARNING: Failed to move \"" + subdir.Name + "\" to temporary directory! Skipping..." );
 						goto loopSkipAhead;
 					}
 
 					try
 					{
-						dis[i].MoveTo( Path.Combine( temp.Parent.FullName, dis[i].Name ) );
+						subdir.MoveTo( Path.Combine( temp.Parent.FullName, subdir.Name ) );
 					}
 					catch
 					{
-						this.writeToLog( "MAJOR ERROR! Failed to move \"" + dis[i].Name + "\" back from temporary directory! You may need to find/fix this or restore a backup!" );
+						this.writeToLog( "MAJOR ERROR! Failed to move \"" + subdir.Name + "\" back from temporary directory! You may need to find/fix this or restore a backup!" );
 						goto loopSkipAhead;
 					}
-				}
-			loopSkipAhead:
-				// The following if checks are separated out so a failure in GetDirectories doesn't interfere with GetFiles and vice-versa
-				bool sortNextDirFolders = false, sortNextDirFiles = false;
 
-				if( sortFolders )
-				{
+				loopSkipAhead:
 					try
 					{
-						if( dis[i].GetDirectories().Length > 0 )
+						if( node.Nodes[i].Nodes.Count > 0 )
 						{
-							sortNextDirFolders = true;
+							sortTreeNodeDirectories( node.Nodes[i] );
 						}
-					}
-					catch
-					{
-						this.writeToLog( "WARNING: Sub-folders in \"" + dis[i].FullName + "\" will not be able to be sorted due to an exception. Skipping..." );
-					}
-				}
-
-				if( sortFiles )
-				{
-					try
-					{
-						if( dis[i].GetFiles().Length > 0 )
-						{
-							sortNextDirFiles = true;
-						}
-					}
-					catch
-					{
-						this.writeToLog( "WARNING: Files in \"" + dis[i].FullName + "\" will not be able to be sorted due to an exception. Skipping..." );
-					}
-				}
-
-				if( sortNextDirFolders || sortNextDirFiles )
-				{
-					try
-					{
-						sortDirectory( dis[i],
-							sortFolders: sortNextDirFolders,
-							sortFiles: sortNextDirFiles,
-							isRootDir: false );
 					}
 					catch( Exception e )
 					{
@@ -222,11 +167,15 @@ namespace StereoUSBSorter
 						this.writeToLog( "We will attempt to continue in hopes that this is benign." );
 					}
 				}
+				else
+				{
+					this.writeToLog( "Odd error has occurred, Node Tag is not a DirectoryInfo?" );
+				}
 
 				// TODO: Fix progress bar to increment smoothly as sub-folders are progressed through as well, not just main folders.
 				if( isRootDir )
 				{
-					this.progressBar.Value = (int)(progressBarInc * i);
+					this.progressBar.Value = (int)( progressBarInc * i );
 					Application.DoEvents();
 				}
 			}
@@ -253,9 +202,11 @@ namespace StereoUSBSorter
 
 		private TreeNode addNodesForDirectory( DirectoryInfo dir, TreeNode root )
 		{
-			TreeNode tn = new TreeNode( dir.Name )
+			TreeNode tn = new TreeNode()
 			{
-				Tag = dir
+				Tag = dir,
+				Text = dir.Name,
+				Name = dir.Name
 			};
 			DirectoryInfo[] subdirs = dir.GetDirectories();
 			for( int i = 0; i < subdirs.Length; ++i )
@@ -267,6 +218,62 @@ namespace StereoUSBSorter
 				root.Nodes.Add( tn );
 			}
 			return tn;
+		}
+
+		private void fillInDataSet( DataSet set, TreeNodeCollection nodes )
+		{
+			for( int i = 0; i < nodes.Count; ++i )
+			{
+				set.Tables.Add( this.createDataTableFromTreeNode( nodes[i] ) );
+				if( nodes[i].Nodes.Count > 0 )
+				{
+					fillInDataSet( set, nodes[i].Nodes );
+				}
+			}
+		}
+
+		private DataTable createDataTableFromTreeNode( TreeNode node )
+		{
+			DataTable ret = new DataTable( node.FullPath );
+			DataColumn dirCol = new DataColumn( "Directory" )
+			{
+				DataType = typeof( string )
+			};
+
+			ret.Columns.Add( dirCol );
+
+			DataColumn nodeCol = new DataColumn( "TreeNode" )
+			{
+				DataType = typeof( TreeNode ),
+				ColumnMapping = MappingType.Hidden
+			};
+
+			ret.Columns.Add( nodeCol );
+
+			for( int i = 0; i < node.Nodes.Count; ++i )
+			{
+				DataRow row = ret.NewRow();
+				row["Directory"] = node.Nodes[i].Text;
+				row["TreeNode"] = node.Nodes[i];
+				ret.Rows.Add( row );
+			}
+
+			ret.RowChanged += this.tableRowChanged;
+			return ret;
+		}
+
+		private void tableRowChanged( object sender, DataRowChangeEventArgs e )
+		{
+			if( e.Action == DataRowAction.Add && sender is DataTable table )
+			{
+				this.tvHierarchy.BeginUpdate();
+				TreeNode nodeMoved = (TreeNode)e.Row["TreeNode"];
+				TreeNode parent = nodeMoved.Parent;
+				int newIndex = table.Rows.IndexOf( e.Row );
+				parent.Nodes.Remove( nodeMoved );
+				parent.Nodes.Insert( newIndex, nodeMoved );
+				this.tvHierarchy.EndUpdate();
+			}
 		}
 
 		#region Form Controls
@@ -321,10 +328,9 @@ namespace StereoUSBSorter
 				this.writeToLog( "Begin Sorting: " + dirFullName );
 				try
 				{
-					sortDirectory( this.selectedDirectory,
-						sortFolders: this.miOptionsAdvancedSortFolders.Checked,
-						sortFiles: this.miOptionsAdvancedSortFiles.Checked,
-						isRootDir: true );
+					this.fileSystemWatcher.EnableRaisingEvents = false;
+					sortTreeNodeDirectories( this.tvHierarchy.Nodes[0] );
+					this.fileSystemWatcher.EnableRaisingEvents = true;
 				}
 				catch( Exception exc )
 				{
@@ -375,9 +381,11 @@ namespace StereoUSBSorter
 					this.selectedDirectory = new DirectoryInfo( fbd.SelectedPath );
 					this.fileSystemWatcher.Path = this.selectedDirectory.FullName;
 					this.fileSystemWatcher.EnableRaisingEvents = true;
+					this.db = new DataSet( this.selectedDirectory.Name );
 					this.tvHierarchy.BeginUpdate();
 					this.tvHierarchy.Nodes.Clear();
 					this.tvHierarchy.Nodes.Add( this.addNodesForDirectory( this.selectedDirectory, null ) );
+					this.fillInDataSet( this.db, this.tvHierarchy.Nodes );
 					this.tvHierarchy.EndUpdate();
 				}
 				catch
@@ -406,58 +414,54 @@ namespace StereoUSBSorter
 
 		private void tvHierarchy_AfterSelect( object sender, TreeViewEventArgs e )
 		{
-			if( this.lbSorting.Tag != null )
-			{
-				TreeNode curNode = (TreeNode)this.lbSorting.Tag;
-				if( curNode.Equals( e.Node ) )
-				{
-					return;
-				}
-			}
-			this.lbSorting.Tag = e.Node;
-			this.lbSorting.Items.Clear();
-			foreach( TreeNode node in e.Node.Nodes )
-			{
-				this.lbSorting.Items.Add( node );
-			}
+			this.dgvEditable.DataSource = this.db.Tables[e.Node.FullPath];
 		}
 
-		private void lbSorting_MouseDown( object sender, MouseEventArgs e )
+		private void dgvEditable_Sorted( object sender, EventArgs e )
 		{
-			if( this.lbSorting.SelectedItem != null )
-			{
-				this.lbSorting.DoDragDrop( this.lbSorting.SelectedItem, DragDropEffects.Move );
-			}
-		}
+			this.tvHierarchy.BeginUpdate();
+			DataGridViewWithDraggableRows control = (DataGridViewWithDraggableRows)sender;
 
-		private void lbSorting_DragOver( object sender, DragEventArgs e )
-		{
-			e.Effect = DragDropEffects.Move;
-		}
+			// Sorting the view for the table doesn't actually sort the underlying data like we want.
+			// Fortunately we can just export the view to a temporary table and use that to sort the tree.
+			DataTable table = (DataTable)control.DataSource;
+			DataTable sortedTable = table.DefaultView.ToTable();
 
-		private void lbSorting_DragDrop( object sender, DragEventArgs e )
-		{
-			Point point = this.lbSorting.PointToClient( new Point( e.X, e.Y ) );
-			int index = this.lbSorting.IndexFromPoint( point );
-			if( index < 0 )
+			for( int i = 0; i < sortedTable.Rows.Count; ++i )
 			{
-				index = this.lbSorting.Items.Count - 1;
+				TreeNode rowNode = (TreeNode)sortedTable.Rows[i]["TreeNode"];
+				TreeNode parent = rowNode.Parent;
+				parent.Nodes.Remove( rowNode );
+				parent.Nodes.Insert( i, rowNode );
 			}
-			TreeNode tn = (TreeNode)e.Data.GetData( typeof( TreeNode ) );
-			// Make a temporary copy of the parent so it isn't forgotten when the current node is removed.
-			TreeNode parent = tn.Parent;
-			this.lbSorting.Items.Remove( tn );
-			parent.Nodes.Remove( tn );
-			parent.Nodes.Insert( index, tn );
-			this.lbSorting.Items.Insert( index, tn );
+
+			this.tvHierarchy.EndUpdate();
 		}
 
 		private void fileSystemEvent( object sender, FileSystemEventArgs e )
 		{
+			switch( e.ChangeType )
+			{
+				case WatcherChangeTypes.Deleted:
+					this.writeToLog( "Received Deleted file system event. Path: " + e.FullPath );
+					break;
+				case WatcherChangeTypes.Created:
+					this.writeToLog( "Received Created file system event. Path: " + e.FullPath );
+					break;
+				case WatcherChangeTypes.Changed:
+					this.writeToLog( "Received Changed file system event. Path: " + e.FullPath );
+					break;
+				default:
+					this.writeToLog( "Received unknown file system event " + (int)e.ChangeType );
+					break;
+			}
+			this.writeToLog( "You may need to reload the program." );
 		}
 
 		private void fileSystemEventRenamed( object sender, RenamedEventArgs e )
 		{
+			this.writeToLog( "Received Changed file system event. Before: " + e.OldFullPath + "; After: " + e.FullPath );
+			this.writeToLog( "You may need to reload the program." );
 		}
 		#endregion
 	}

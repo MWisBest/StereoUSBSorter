@@ -60,13 +60,14 @@ namespace StereoUSBSorter
 			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.treeContainer = new System.Windows.Forms.SplitContainer();
 			this.tvHierarchy = new System.Windows.Forms.TreeView();
-			this.lbSorting = new System.Windows.Forms.ListBox();
+			this.dgvEditable = new StereoUSBSorter.DataGridViewWithDraggableRows();
 			this.fileSystemWatcher = new System.IO.FileSystemWatcher();
 			this.menuStrip.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.treeContainer)).BeginInit();
 			this.treeContainer.Panel1.SuspendLayout();
 			this.treeContainer.Panel2.SuspendLayout();
 			this.treeContainer.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dgvEditable)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -192,7 +193,7 @@ namespace StereoUSBSorter
 			// 
 			// treeContainer.Panel2
 			// 
-			this.treeContainer.Panel2.Controls.Add(this.lbSorting);
+			this.treeContainer.Panel2.Controls.Add(this.dgvEditable);
 			this.treeContainer.Size = new System.Drawing.Size(627, 252);
 			this.treeContainer.SplitterDistance = 260;
 			this.treeContainer.TabIndex = 9;
@@ -200,26 +201,37 @@ namespace StereoUSBSorter
 			// tvHierarchy
 			// 
 			this.tvHierarchy.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.tvHierarchy.HideSelection = false;
 			this.tvHierarchy.Location = new System.Drawing.Point(0, 0);
 			this.tvHierarchy.Name = "tvHierarchy";
 			this.tvHierarchy.Size = new System.Drawing.Size(260, 252);
 			this.tvHierarchy.TabIndex = 0;
 			this.tvHierarchy.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvHierarchy_AfterSelect);
 			// 
-			// lbSorting
+			// dgvEditable
 			// 
-			this.lbSorting.AllowDrop = true;
-			this.lbSorting.DisplayMember = "Text";
-			this.lbSorting.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.lbSorting.FormattingEnabled = true;
-			this.lbSorting.Location = new System.Drawing.Point(0, 0);
-			this.lbSorting.Name = "lbSorting";
-			this.lbSorting.Size = new System.Drawing.Size(363, 252);
-			this.lbSorting.TabIndex = 0;
-			this.lbSorting.ValueMember = "Text";
-			this.lbSorting.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbSorting_DragDrop);
-			this.lbSorting.DragOver += new System.Windows.Forms.DragEventHandler(this.lbSorting_DragOver);
-			this.lbSorting.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbSorting_MouseDown);
+			this.dgvEditable.AllowDrop = true;
+			this.dgvEditable.AllowUserToAddRows = false;
+			this.dgvEditable.AllowUserToDeleteRows = false;
+			this.dgvEditable.AllowUserToOrderColumns = true;
+			this.dgvEditable.AllowUserToResizeRows = false;
+			this.dgvEditable.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+			this.dgvEditable.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+			this.dgvEditable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dgvEditable.DataWidthRect = true;
+			this.dgvEditable.DividerColor = System.Drawing.Color.Red;
+			this.dgvEditable.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dgvEditable.EnableHeadersVisualStyles = false;
+			this.dgvEditable.Location = new System.Drawing.Point(0, 0);
+			this.dgvEditable.MultiSelect = false;
+			this.dgvEditable.Name = "dgvEditable";
+			this.dgvEditable.ReadOnly = true;
+			this.dgvEditable.RowHeadersVisible = false;
+			this.dgvEditable.SelectionColor = System.Drawing.Color.Transparent;
+			this.dgvEditable.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+			this.dgvEditable.Size = new System.Drawing.Size(363, 252);
+			this.dgvEditable.TabIndex = 1;
+			this.dgvEditable.Sorted += new System.EventHandler(this.dgvEditable_Sorted);
 			// 
 			// fileSystemWatcher
 			// 
@@ -252,6 +264,7 @@ namespace StereoUSBSorter
 			this.treeContainer.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.treeContainer)).EndInit();
 			this.treeContainer.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dgvEditable)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
@@ -274,6 +287,6 @@ namespace StereoUSBSorter
 		private System.Windows.Forms.SplitContainer treeContainer;
 		private System.Windows.Forms.TreeView tvHierarchy;
 		private System.IO.FileSystemWatcher fileSystemWatcher;
-		private System.Windows.Forms.ListBox lbSorting;
+		private DataGridViewWithDraggableRows dgvEditable;
 	}
 }
