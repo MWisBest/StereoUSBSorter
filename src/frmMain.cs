@@ -29,6 +29,7 @@ namespace StereoUSBSorter
 		private DirectoryInfo selectedDirectory;
 		private bool logEnabled = true;
 		private bool isBusySorting = false;
+		private bool disableRowChangedHandler = false;
 		private DataSet db;
 
 		public frmMain()
@@ -264,7 +265,7 @@ namespace StereoUSBSorter
 
 		private void tableRowChanged( object sender, DataRowChangeEventArgs e )
 		{
-			if( e.Action == DataRowAction.Add && sender is DataTable table )
+			if( !this.disableRowChangedHandler && e.Action == DataRowAction.Add && sender is DataTable table )
 			{
 				this.tvHierarchy.BeginUpdate();
 				TreeNode nodeMoved = (TreeNode)e.Row["TreeNode"];
@@ -423,18 +424,30 @@ namespace StereoUSBSorter
 			DataGridViewWithDraggableRows control = (DataGridViewWithDraggableRows)sender;
 
 			// Sorting the view for the table doesn't actually sort the underlying data like we want.
-			// Fortunately we can just export the view to a temporary table and use that to sort the tree.
+			// We could export the view to a temporary table and use that to sort only the tree, but that
+			// breaks future drag'n'drop operations, so we must sort the actual data ourself with this ugly.
 			DataTable table = (DataTable)control.DataSource;
 			DataTable sortedTable = table.DefaultView.ToTable();
+			// can't fire off row changed events here...
+			this.disableRowChangedHandler = true;
+
+			while( table.Rows.Count > 0 )
+			{
+				table.Rows.RemoveAt( 0 );
+			}
 
 			for( int i = 0; i < sortedTable.Rows.Count; ++i )
 			{
+				// NOTE: ImportRow does not work, the TreeNode loses its Parent etc; .NET BUG??
+				table.LoadDataRow( sortedTable.Rows[i].ItemArray, true );
 				TreeNode rowNode = (TreeNode)sortedTable.Rows[i]["TreeNode"];
 				TreeNode parent = rowNode.Parent;
 				parent.Nodes.Remove( rowNode );
 				parent.Nodes.Insert( i, rowNode );
 			}
 
+			// re-enable row changed events
+			this.disableRowChangedHandler = false;
 			this.tvHierarchy.EndUpdate();
 		}
 
