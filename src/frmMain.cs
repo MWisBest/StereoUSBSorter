@@ -431,10 +431,7 @@ namespace StereoUSBSorter
 			// can't fire off row changed events here...
 			this.disableRowChangedHandler = true;
 
-			while( table.Rows.Count > 0 )
-			{
-				table.Rows.RemoveAt( 0 );
-			}
+			table.Rows.Clear();
 
 			for( int i = 0; i < sortedTable.Rows.Count; ++i )
 			{
