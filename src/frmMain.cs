@@ -20,6 +20,8 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace StereoUSBSorter
@@ -30,6 +32,7 @@ namespace StereoUSBSorter
 		private bool logEnabled = true;
 		private bool isBusySorting = false;
 		private bool disableRowChangedHandler = false;
+		private object changingFileSystemEventStateLock = new object();
 		private DataSet db;
 
 		public frmMain()
@@ -67,6 +70,32 @@ namespace StereoUSBSorter
 				this.txtLog.AppendText( text );
 				this.txtLog.SelectionStart = this.txtLog.Text.Length;
 				this.txtLog.Refresh();
+			}
+		}
+
+		/// <summary>
+		/// Disables the file system event watcher.
+		/// 
+		/// Locks if a delayed re-enable is pending.
+		/// </summary>
+		private void disableFileSystemEvents()
+		{
+			lock( this.changingFileSystemEventStateLock )
+			{
+				this.fileSystemWatcher.EnableRaisingEvents = false;
+			}
+		}
+
+		/// <summary>
+		/// Delays re-enabling the file system event watcher to ensure all pending changes are flushed to the disk
+		/// </summary>
+		/// <param name="msDelay">ms to delay</param>
+		private void enableFileSystemEvents( int msDelay = 1000 )
+		{
+			lock( this.changingFileSystemEventStateLock )
+			{
+				Thread.Sleep( msDelay );
+				this.fileSystemWatcher.EnableRaisingEvents = true;
 			}
 		}
 
@@ -326,19 +355,28 @@ namespace StereoUSBSorter
 					this.writeToLog( "ERROR: Couldn't read directory name. Something is clearly wrong, aborting..." );
 					goto skipFinishedSorting;
 				}
-				this.writeToLog( "Begin Sorting: " + dirFullName );
+
+				// Note: disableFileSystemEvents() may lock waiting on a re-enable event.
+				this.disableFileSystemEvents();
+
 				try
 				{
-					this.fileSystemWatcher.EnableRaisingEvents = false;
+					this.writeToLog( "Begin Sorting: " + dirFullName );
 					sortTreeNodeDirectories( this.tvHierarchy.Nodes[0] );
-					this.fileSystemWatcher.EnableRaisingEvents = true;
+					this.writeToLog( "Finished Sorting: " + dirFullName );
 				}
 				catch( Exception exc )
 				{
 					this.writeToLog( "UNEXPECTED EXCEPTION OCCURRED! " + exc.GetType().ToString() + ": " + exc.Message );
 					this.writeToLog( "ERROR: Major unhandled exception. Please copy this log and file a bug report." );
 				}
-				this.writeToLog( "Finished Sorting: " + dirFullName );
+				finally
+				{
+					// Not all sorting changes may be flushed to the disk yet, so a delay is
+					// required before re-enabling events (see this.enableFileSystemEvents())
+					Task t = Task.Run( () => { this.enableFileSystemEvents( 1500 ); } );
+				}
+
 			skipFinishedSorting:
 				this.isBusySorting = false;
 				Application.UseWaitCursor = false;
