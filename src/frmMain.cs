@@ -98,7 +98,7 @@ namespace StereoUSBSorter
 			lock( this.changingFileSystemEventStateLock )
 			{
 				// Return right away if there's nothing to do.
-				if( this.fileSystemWatcher.Path != null ||
+				if( this.fileSystemWatcher.Path == null ||
 					this.monitorFilesystem == this.fileSystemWatcher.EnableRaisingEvents )
 				{
 					return;
@@ -327,7 +327,7 @@ namespace StereoUSBSorter
 			{
 				this.monitorFilesystem = state;
 
-				if( this.fileSystemWatcher.Path != null ||
+				if( this.fileSystemWatcher.Path == null ||
 					this.monitorFilesystem == this.fileSystemWatcher.EnableRaisingEvents )
 				{
 					return;
