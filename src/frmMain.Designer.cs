@@ -55,6 +55,7 @@ namespace StereoUSBSorter
 			this.miOptionsAdvancedSortFolders = new System.Windows.Forms.ToolStripMenuItem();
 			this.miOptionsAdvancedSortFiles = new System.Windows.Forms.ToolStripMenuItem();
 			this.miOptionsAdvancedChangeDates = new System.Windows.Forms.ToolStripMenuItem();
+			this.miOptionsAdvancedMonitorFilesystem = new System.Windows.Forms.ToolStripMenuItem();
 			this.miOptionsEnableLog = new System.Windows.Forms.ToolStripMenuItem();
 			this.txtLog = new System.Windows.Forms.TextBox();
 			this.progressBar = new System.Windows.Forms.ProgressBar();
@@ -122,32 +123,44 @@ namespace StereoUSBSorter
 			this.miOptionsAdvanced.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miOptionsAdvancedSortFolders,
             this.miOptionsAdvancedSortFiles,
-            this.miOptionsAdvancedChangeDates});
+            this.miOptionsAdvancedChangeDates,
+            this.miOptionsAdvancedMonitorFilesystem});
 			this.miOptionsAdvanced.Name = "miOptionsAdvanced";
-			this.miOptionsAdvanced.Size = new System.Drawing.Size(132, 22);
+			this.miOptionsAdvanced.Size = new System.Drawing.Size(152, 22);
 			this.miOptionsAdvanced.Text = "Advanced";
 			// 
 			// miOptionsAdvancedSortFolders
 			// 
 			this.miOptionsAdvancedSortFolders.Checked = true;
+			this.miOptionsAdvancedSortFolders.CheckOnClick = true;
 			this.miOptionsAdvancedSortFolders.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.miOptionsAdvancedSortFolders.Name = "miOptionsAdvancedSortFolders";
-			this.miOptionsAdvancedSortFolders.Size = new System.Drawing.Size(147, 22);
+			this.miOptionsAdvancedSortFolders.Size = new System.Drawing.Size(175, 22);
 			this.miOptionsAdvancedSortFolders.Text = "Sort Folders";
 			// 
 			// miOptionsAdvancedSortFiles
 			// 
 			this.miOptionsAdvancedSortFiles.CheckOnClick = true;
 			this.miOptionsAdvancedSortFiles.Name = "miOptionsAdvancedSortFiles";
-			this.miOptionsAdvancedSortFiles.Size = new System.Drawing.Size(147, 22);
+			this.miOptionsAdvancedSortFiles.Size = new System.Drawing.Size(175, 22);
 			this.miOptionsAdvancedSortFiles.Text = "Sort Files";
 			// 
 			// miOptionsAdvancedChangeDates
 			// 
 			this.miOptionsAdvancedChangeDates.CheckOnClick = true;
 			this.miOptionsAdvancedChangeDates.Name = "miOptionsAdvancedChangeDates";
-			this.miOptionsAdvancedChangeDates.Size = new System.Drawing.Size(147, 22);
+			this.miOptionsAdvancedChangeDates.Size = new System.Drawing.Size(175, 22);
 			this.miOptionsAdvancedChangeDates.Text = "Change Dates";
+			// 
+			// miOptionsAdvancedMonitorFilesystem
+			// 
+			this.miOptionsAdvancedMonitorFilesystem.Checked = true;
+			this.miOptionsAdvancedMonitorFilesystem.CheckOnClick = true;
+			this.miOptionsAdvancedMonitorFilesystem.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.miOptionsAdvancedMonitorFilesystem.Name = "miOptionsAdvancedMonitorFilesystem";
+			this.miOptionsAdvancedMonitorFilesystem.Size = new System.Drawing.Size(175, 22);
+			this.miOptionsAdvancedMonitorFilesystem.Text = "Monitor Filesystem";
+			this.miOptionsAdvancedMonitorFilesystem.CheckStateChanged += new System.EventHandler(this.miOptionsAdvancedMonitorFilesystem_CheckStateChanged);
 			// 
 			// miOptionsEnableLog
 			// 
@@ -155,7 +168,7 @@ namespace StereoUSBSorter
 			this.miOptionsEnableLog.CheckOnClick = true;
 			this.miOptionsEnableLog.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.miOptionsEnableLog.Name = "miOptionsEnableLog";
-			this.miOptionsEnableLog.Size = new System.Drawing.Size(132, 22);
+			this.miOptionsEnableLog.Size = new System.Drawing.Size(152, 22);
 			this.miOptionsEnableLog.Text = "Enable Log";
 			this.miOptionsEnableLog.CheckStateChanged += new System.EventHandler(this.miOptionsEnableLog_CheckStateChanged);
 			// 
@@ -289,5 +302,6 @@ namespace StereoUSBSorter
 		private System.Windows.Forms.TreeView tvHierarchy;
 		private System.IO.FileSystemWatcher fileSystemWatcher;
 		private DataGridViewWithDraggableRows dgvEditable;
+		private System.Windows.Forms.ToolStripMenuItem miOptionsAdvancedMonitorFilesystem;
 	}
 }

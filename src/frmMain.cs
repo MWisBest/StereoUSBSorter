@@ -33,8 +33,10 @@ namespace StereoUSBSorter
 		private bool hasUnsavedChanges = false;
 		private bool isBusySorting = false;
 		private bool disableRowChangedHandler = false;
-		private object changingFileSystemEventStateLock = new object();
 		private DataSet db;
+
+		private object changingFileSystemEventStateLock = new object();
+		private bool monitorFilesystem = true; // Must be accessed with changingFileSystemEventStateLock held!
 
 		public frmMain()
 		{
@@ -91,12 +93,23 @@ namespace StereoUSBSorter
 		/// Delays re-enabling the file system event watcher to ensure all pending changes are flushed to the disk
 		/// </summary>
 		/// <param name="msDelay">ms to delay</param>
-		private void enableFileSystemEvents( int msDelay = 1000 )
+		private void updateFileSystemEventsState( int msDelay = 1000 )
 		{
 			lock( this.changingFileSystemEventStateLock )
 			{
-				Thread.Sleep( msDelay );
-				this.fileSystemWatcher.EnableRaisingEvents = true;
+				// Return right away if there's nothing to do.
+				if( this.fileSystemWatcher.Path != null ||
+					this.monitorFilesystem == this.fileSystemWatcher.EnableRaisingEvents )
+				{
+					return;
+				}
+
+				// Don't sleep if we're disabling events anyway
+				if( this.monitorFilesystem )
+				{
+					Thread.Sleep( msDelay );
+				}
+				this.fileSystemWatcher.EnableRaisingEvents = this.monitorFilesystem;
 			}
 		}
 
@@ -308,6 +321,32 @@ namespace StereoUSBSorter
 			}
 		}
 
+		private void updateFilesystemMonitorPref( bool state )
+		{
+			lock( this.changingFileSystemEventStateLock )
+			{
+				this.monitorFilesystem = state;
+
+				if( this.fileSystemWatcher.Path != null ||
+					this.monitorFilesystem == this.fileSystemWatcher.EnableRaisingEvents )
+				{
+					return;
+				}
+
+				// If it's busy sorting, let the end of sort update do the job.
+				// 
+				// TODO: This is kind of sketchy...
+				// isBusySorting is set to false just before updateFileSystemEventsState is called to do the
+				// end of sort update. However, updateFileSystemEventsState takes the same lock as here, so
+				// in practice the only potential problem is events could be re-enabled before the flush delay
+				// is finished, which would take a very determined monkey to accomplish and isn't serious.
+				if( !this.isBusySorting )
+				{
+					this.fileSystemWatcher.EnableRaisingEvents = this.monitorFilesystem;
+				}
+			}
+		}
+
 		#region Form Controls
 		private void btnApply_Click( object sender, EventArgs e )
 		{
@@ -386,9 +425,11 @@ namespace StereoUSBSorter
 				}
 				finally
 				{
-					// Not all sorting changes may be flushed to the disk yet, so a delay is
-					// required before re-enabling events (see this.enableFileSystemEvents())
-					Task t = Task.Run( () => { this.enableFileSystemEvents( 1500 ); } );
+					// Double-set of isBusySorting required for ""thread-safe"" updateFilesystemMonitorPref
+					this.isBusySorting = false;
+					// Not all sorting changes may be flushed to the disk yet, so a delay is required
+					// before re-enabling events (see this.updateFileSystemEventsState())
+					Task t = Task.Run( () => { this.updateFileSystemEventsState( 1500 ); } );
 				}
 
 			skipFinishedSorting:
@@ -434,7 +475,7 @@ namespace StereoUSBSorter
 				{
 					this.selectedDirectory = new DirectoryInfo( fbd.SelectedPath );
 					this.fileSystemWatcher.Path = this.selectedDirectory.FullName;
-					this.fileSystemWatcher.EnableRaisingEvents = true;
+					this.fileSystemWatcher.EnableRaisingEvents = this.monitorFilesystem;
 					this.db = new DataSet( this.selectedDirectory.Name );
 					this.tvHierarchy.BeginUpdate();
 					this.tvHierarchy.Nodes.Clear();
@@ -464,6 +505,14 @@ namespace StereoUSBSorter
 				this.txtLog.BackColor = SystemColors.Control;
 				this.txtLog.Text = "";
 			}
+		}
+
+		private void miOptionsAdvancedMonitorFilesystem_CheckStateChanged( object sender, EventArgs e )
+		{
+			ToolStripMenuItem mi = (ToolStripMenuItem)sender;
+			bool isChecked = mi.CheckState == CheckState.Checked;
+
+			Task t = Task.Run( () => { this.updateFilesystemMonitorPref( isChecked ); } );
 		}
 
 		private void tvHierarchy_AfterSelect( object sender, TreeViewEventArgs e )
