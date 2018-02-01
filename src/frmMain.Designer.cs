@@ -258,6 +258,7 @@ namespace StereoUSBSorter
 			this.MinimumSize = new System.Drawing.Size(300, 300);
 			this.Name = "frmMain";
 			this.Text = "Stereo USB Sorter";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
 			this.menuStrip.ResumeLayout(false);
 			this.menuStrip.PerformLayout();
 			this.treeContainer.Panel1.ResumeLayout(false);

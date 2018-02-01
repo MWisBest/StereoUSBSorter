@@ -527,6 +527,23 @@ namespace StereoUSBSorter
 			this.writeToLog( "Received Changed file system event. Before: " + e.OldFullPath + "; After: " + e.FullPath );
 			this.writeToLog( "You may need to reload the program." );
 		}
+
+		private void frmMain_FormClosing( object sender, FormClosingEventArgs e )
+		{
+			// Don't intercept force closes e.g. the OS is shutting down
+			if( e.CloseReason == CloseReason.UserClosing )
+			{
+				if( this.hasUnsavedChanges )
+				{
+					string text = "You have not saved your changes!";
+					text += Environment.NewLine + "Are you sure you want to exit?";
+					if( MessageBox.Show( text, "Exit?", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation ) == DialogResult.No )
+					{
+						e.Cancel = true;
+					}
+				}
+			}
+		}
 		#endregion
 	}
 }
