@@ -356,7 +356,7 @@ namespace StereoUSBSorter
 			{
 				if( dragFromRow.DataBoundItem is DataRowView dv )
 				{
-					if( table.DefaultView.Sort != null && !string.IsNullOrWhiteSpace( table.DefaultView.Sort ) )
+					if( !string.IsNullOrWhiteSpace( table.DefaultView.Sort ) )
 					{
 						// Somebody sorted the table, and decided to do a drag, so first we have to un-sort the view.
 						table.DefaultView.Sort = "";
