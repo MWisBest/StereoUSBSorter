@@ -331,11 +331,11 @@ namespace StereoUSBSorter
 				Util.showErrorMessageBox( "Error determining if drive is system drive. Aborting." );
 				return;
 			}
-			if( !miOptionsAdvancedSortFolders.Checked && !miOptionsAdvancedSortFiles.Checked )
+			if( !this.miOptionsAdvancedSortFolders.Checked && !this.miOptionsAdvancedSortFiles.Checked )
 			{
 				goto optionsRationalityError;
 			}
-			if( isBusySorting )
+			if( this.isBusySorting )
 			{
 				goto alreadySorting;
 			}
@@ -375,7 +375,7 @@ namespace StereoUSBSorter
 				try
 				{
 					this.writeToLog( "Begin Sorting: " + dirFullName );
-					sortTreeNodeDirectories( this.tvHierarchy.Nodes[0] );
+					this.sortTreeNodeDirectories( this.tvHierarchy.Nodes[0] );
 					this.writeToLog( "Finished Sorting: " + dirFullName );
 					this.hasUnsavedChanges = false;
 				}
