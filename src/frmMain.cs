@@ -30,6 +30,7 @@ namespace StereoUSBSorter
 	{
 		private DirectoryInfo selectedDirectory;
 		private bool logEnabled = true;
+		private bool hasUnsavedChanges = false;
 		private bool isBusySorting = false;
 		private bool disableRowChangedHandler = false;
 		private object changingFileSystemEventStateLock = new object();
@@ -296,6 +297,7 @@ namespace StereoUSBSorter
 		{
 			if( !this.disableRowChangedHandler && e.Action == DataRowAction.Add && sender is DataTable table )
 			{
+				this.hasUnsavedChanges = true;
 				this.tvHierarchy.BeginUpdate();
 				TreeNode nodeMoved = (TreeNode)e.Row["TreeNode"];
 				TreeNode parent = nodeMoved.Parent;
@@ -337,10 +339,21 @@ namespace StereoUSBSorter
 			{
 				goto alreadySorting;
 			}
-			string dialogText = "Are you sure you want to continue?";
-			dialogText += Environment.NewLine + "Reordering drive/folder: " + this.selectedDirectory;
-			dialogText += Environment.NewLine + "This is potentially dangerous if the wrong drive is selected!!";
-			if( MessageBox.Show( dialogText, "Continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning ) == DialogResult.Yes )
+
+			if( !this.hasUnsavedChanges )
+			{
+				string alreadySavedText = "You don't appear to have any unsaved changes.";
+				alreadySavedText += Environment.NewLine + "Would you like to continue anyway?";
+				if( MessageBox.Show( alreadySavedText, "Continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Information ) != DialogResult.Yes )
+				{
+					return;
+				}
+			}
+
+			string continueText = "Are you sure you want to continue?";
+			continueText += Environment.NewLine + "Reordering drive/folder: " + this.selectedDirectory;
+			continueText += Environment.NewLine + "This is potentially dangerous if the wrong drive is selected!!";
+			if( MessageBox.Show( continueText, "Continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning ) == DialogResult.Yes )
 			{
 				Application.UseWaitCursor = true;
 				Application.DoEvents();
@@ -364,6 +377,7 @@ namespace StereoUSBSorter
 					this.writeToLog( "Begin Sorting: " + dirFullName );
 					sortTreeNodeDirectories( this.tvHierarchy.Nodes[0] );
 					this.writeToLog( "Finished Sorting: " + dirFullName );
+					this.hasUnsavedChanges = false;
 				}
 				catch( Exception exc )
 				{
@@ -415,6 +429,7 @@ namespace StereoUSBSorter
 			};
 			if( fbd.ShowDialog() == DialogResult.OK )
 			{
+				this.hasUnsavedChanges = false;
 				try
 				{
 					this.selectedDirectory = new DirectoryInfo( fbd.SelectedPath );
@@ -458,6 +473,7 @@ namespace StereoUSBSorter
 
 		private void dgvEditable_Sorted( object sender, EventArgs e )
 		{
+			this.hasUnsavedChanges = true;
 			this.tvHierarchy.BeginUpdate();
 			DataGridViewWithDraggableRows control = (DataGridViewWithDraggableRows)sender;
 
