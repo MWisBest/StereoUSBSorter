@@ -176,9 +176,31 @@ namespace StereoUSBSorter
 						this.writeToLog( "WARNING: Failed to log folder being sorted? Attempting to continue..." );
 					}
 
+					// In order to avoid clogging up the FAT structures and require a clean-up/format, we
+					// need to use short folder names for moves. This avoids LFN entries.
+					DirectoryInfo tempSubTemp = null;
+					string origFolderName = null;
+
 					try
 					{
-						subdir.MoveTo( Path.Combine( temp.FullName, subdir.Name ) );
+						tempSubTemp = Util.getTempDir( temp ); // will be created by MoveTo
+						origFolderName = subdir.Name;
+					}
+					catch
+					{
+						this.writeToLog( "WARNING: Failed to create a proper temp directory. Attempting to continue..." );
+					}
+
+					try
+					{
+						if( tempSubTemp != null && origFolderName != null )
+						{
+							subdir.MoveTo( Path.Combine( temp.FullName, tempSubTemp.Name ) );
+						}
+						else
+						{
+							subdir.MoveTo( Path.Combine( temp.FullName, subdir.Name ) );
+						}
 					}
 					catch
 					{
@@ -188,7 +210,14 @@ namespace StereoUSBSorter
 
 					try
 					{
-						subdir.MoveTo( Path.Combine( temp.Parent.FullName, subdir.Name ) );
+						if( tempSubTemp != null && origFolderName != null )
+						{
+							subdir.MoveTo( Path.Combine( temp.Parent.FullName, origFolderName ) );
+						}
+						else
+						{
+							subdir.MoveTo( Path.Combine( temp.Parent.FullName, subdir.Name ) );
+						}
 					}
 					catch
 					{
