@@ -310,17 +310,16 @@ namespace StereoUSBSorter
 			DataTable ret = new DataTable( node.FullPath );
 			DataColumn dirCol = new DataColumn( "Directory" )
 			{
-				DataType = typeof( string )
+				DataType = typeof( string ),
+				Unique = true
 			};
-
-			ret.Columns.Add( dirCol );
-
 			DataColumn nodeCol = new DataColumn( "TreeNode" )
 			{
 				DataType = typeof( TreeNode ),
 				ColumnMapping = MappingType.Hidden
 			};
 
+			ret.Columns.Add( dirCol );
 			ret.Columns.Add( nodeCol );
 
 			for( int i = 0; i < node.Nodes.Count; ++i )
