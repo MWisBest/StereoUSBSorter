@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -122,7 +123,8 @@ namespace StereoUSBSorter
 		/// <param name="node">node to sort</param>
 		private void sortTreeNodeDirectories( TreeNode node )
 		{
-			DirectoryInfo dir = (DirectoryInfo)node.Tag;
+			TreeNodeDirTag tag = (TreeNodeDirTag)node.Tag;
+			DirectoryInfo dir = tag.dir;
 			bool isRootDir = node.Parent == null;
 			string dirFullName;
 
@@ -156,10 +158,13 @@ namespace StereoUSBSorter
 			}
 			float progressBarInc = 100 / node.Nodes.Count;
 
+			bool haveHitChangedTag = false;
+
 			for( int i = 0; i < node.Nodes.Count; ++i )
 			{
-				if( node.Nodes[i].Tag is DirectoryInfo subdir )
+				if( node.Nodes[i].Tag is TreeNodeDirTag subTag )
 				{
+					DirectoryInfo subdir = subTag.dir;
 					try
 					{
 						if( isRootDir )
@@ -176,8 +181,20 @@ namespace StereoUSBSorter
 						this.writeToLog( "WARNING: Failed to log folder being sorted? Attempting to continue..." );
 					}
 
-					// In order to avoid clogging up the FAT structures and require a clean-up/format, we
-					// need to use short folder names for moves. This avoids LFN entries.
+					// In order to avoid clogging up the FAT structures and require a clean-up/format,
+					// skip ahead until we hit a tag that has changed/been sorted. This avoids unnecessary
+					// moves completely. NOTE: this is after the logging so users aren't confused.
+					if( subTag.wasMoved )
+					{
+						haveHitChangedTag = true;
+					}
+					if( !haveHitChangedTag )
+					{
+						goto loopSkipAhead;
+					}
+
+					// Further avoiding clogging up the FAT structures, we use
+					// short folder names for moves. This avoids LFN entries.
 					DirectoryInfo tempSubTemp = null;
 					string origFolderName = null;
 
@@ -224,6 +241,9 @@ namespace StereoUSBSorter
 						this.writeToLog( "MAJOR ERROR! Failed to move \"" + subdir.Name + "\" back from temporary directory! You may need to find/fix this or restore a backup!" );
 						goto loopSkipAhead;
 					}
+
+					// Might as well un-set that the tag was moved, since it just got sorted...
+					subTag.wasMoved = false;
 
 				loopSkipAhead:
 					try
@@ -275,9 +295,10 @@ namespace StereoUSBSorter
 
 		private TreeNode addNodesForDirectory( DirectoryInfo dir, TreeNode root )
 		{
+			TreeNodeDirTag tag = new TreeNodeDirTag( dir );
 			TreeNode tn = new TreeNode()
 			{
-				Tag = dir,
+				Tag = tag,
 				Text = dir.Name,
 				Name = dir.Name
 			};
@@ -345,6 +366,10 @@ namespace StereoUSBSorter
 				int newIndex = table.Rows.IndexOf( e.Row );
 				parent.Nodes.Remove( nodeMoved );
 				parent.Nodes.Insert( newIndex, nodeMoved );
+				if( nodeMoved.Tag is TreeNodeDirTag tag )
+				{
+					tag.wasMoved = true;
+				}
 				this.tvHierarchy.EndUpdate();
 			}
 		}
@@ -562,7 +587,17 @@ namespace StereoUSBSorter
 			// can't fire off row changed events here...
 			this.disableRowChangedHandler = true;
 
+			// In case the sort does nothing/is mostly useless, try to detect exactly what changed
+			// in the order so we can set the TreeNode wasChanged tag properly for the Apply later.
+			List<string> originalDirOrder = new List<string>();
+			for( int i = 0; i < table.Rows.Count; ++i )
+			{
+				originalDirOrder.Add( (string)table.Rows[i]["Directory"] );
+			}
+
 			table.Rows.Clear();
+
+			bool hitOrderChangePoint = false;
 
 			for( int i = 0; i < sortedTable.Rows.Count; ++i )
 			{
@@ -572,6 +607,27 @@ namespace StereoUSBSorter
 				TreeNode parent = rowNode.Parent;
 				parent.Nodes.Remove( rowNode );
 				parent.Nodes.Insert( i, rowNode );
+				if( rowNode.Tag is TreeNodeDirTag tag )
+				{
+					// If something before this changed, just mark everything after as changed too.
+					//
+					// TODO: Can this be improved?
+					// Example: Only one entry is moved during sort, but this entry is dragged down manually later.
+					//          But now everything above it is marked as moved, even though they actually were not.
+					if( hitOrderChangePoint )
+					{
+						tag.wasMoved = true;
+					}
+					else
+					{
+						string directoryName = (string)sortedTable.Rows[i]["Directory"];
+						if( directoryName != originalDirOrder[i] )
+						{
+							hitOrderChangePoint = true;
+							tag.wasMoved = true;
+						}
+					}
+				}
 			}
 
 			// re-enable row changed events
