@@ -602,7 +602,7 @@ namespace StereoUSBSorter
 
 			// In case the sort does nothing/is mostly useless, try to detect exactly what changed
 			// in the order so we can set the TreeNode wasChanged tag properly for the Apply later.
-			List<string> originalDirOrder = new List<string>();
+			List<string> originalDirOrder = new List<string>( table.Rows.Count );
 			for( int i = 0; i < table.Rows.Count; ++i )
 			{
 				originalDirOrder.Add( (string)table.Rows[i]["Directory"] );
