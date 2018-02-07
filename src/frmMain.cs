@@ -188,10 +188,15 @@ namespace StereoUSBSorter
 					{
 						haveHitChangedTag = true;
 					}
+					if( !haveHitChangedTag )
+					{
+						goto loopSkipAhead;
+					}
 					// The first folder can always be skipped, doing all the others
 					// after it will effectively move it to first in the order.
-					if( !haveHitChangedTag || i == 0 )
+					if( i == 0 )
 					{
+						subTag.wasMoved = false;
 						goto loopSkipAhead;
 					}
 
