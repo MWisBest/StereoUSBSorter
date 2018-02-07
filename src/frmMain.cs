@@ -138,19 +138,6 @@ namespace StereoUSBSorter
 				return;
 			}
 
-			DirectoryInfo temp;
-
-			try
-			{
-				temp = Util.getTempDir( dir );
-				temp.Create();
-			}
-			catch
-			{
-				this.writeToLog( "WARNING: Unable to create temp directory in \"" + dirFullName + "\". Skipping..." );
-				return;
-			}
-
 			if( isRootDir )
 			{
 				this.progressBar.Value = 0;
@@ -158,6 +145,8 @@ namespace StereoUSBSorter
 			}
 			float progressBarInc = 100 / node.Nodes.Count;
 
+			// Temp folder is not created until absolutely necessary.
+			DirectoryInfo temp = null;
 			bool haveHitChangedTag = false;
 
 			for( int i = 0; i < node.Nodes.Count; ++i )
@@ -198,6 +187,20 @@ namespace StereoUSBSorter
 					{
 						subTag.wasMoved = false;
 						goto loopSkipAhead;
+					}
+
+					if( temp == null )
+					{
+						try
+						{
+							temp = Util.getTempDir( dir );
+							temp.Create();
+						}
+						catch
+						{
+							this.writeToLog( "WARNING: Unable to create temp directory in \"" + dirFullName + "\". Skipping..." );
+							goto loopSkipAhead;
+						}
 					}
 
 					// Further avoiding clogging up the FAT structures, we use
@@ -280,17 +283,20 @@ namespace StereoUSBSorter
 				}
 			}
 
-			try
+			if( temp != null )
 			{
-				temp.Delete();
-			}
-			catch( DirectoryNotFoundException )
-			{
-				this.writeToLog( "WARNING: Unable to remove temp directory \"" + temp.FullName + "\" because it no longer exists. Skipping..." );
-			}
-			catch
-			{
-				this.writeToLog( "WARNING: Unable to remove temp directory \"" + temp.FullName + "\". Skipping..." );
+				try
+				{
+					temp.Delete();
+				}
+				catch( DirectoryNotFoundException )
+				{
+					this.writeToLog( "WARNING: Unable to remove temp directory \"" + temp.FullName + "\" because it no longer exists. Skipping..." );
+				}
+				catch
+				{
+					this.writeToLog( "WARNING: Unable to remove temp directory \"" + temp.FullName + "\". Skipping..." );
+				}
 			}
 
 			if( isRootDir )
